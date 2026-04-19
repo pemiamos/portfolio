@@ -5,9 +5,12 @@ backend:
 media_folder: public/images/projects
 public_folder: /images/projects
 
+locale: zh_Hans
+
 collections:
   - name: projects
     label: 项目
+    label_singular: 项目
     folder: src/content/projects
     create: true
     extension: mdx
@@ -16,8 +19,11 @@ collections:
       - { label: 标题, name: title, widget: string }
       - { label: 年份, name: year, widget: number }
       - { label: 媒介, name: medium, widget: string }
-      - { label: 主题, name: themes, widget: list }
-      - { label: 封面图, name: cover, widget: string }
-      - { label: 简介, name: summary, widget: text }
-      - { label: 精选, name: featured, widget: boolean, default: false }
-      - { label: 正文, name: body, widget: markdown }
+      - label: 主题
+        name: themes
+        widget: list
+        default: []
+      - { label: 封面图路径, name: cover, widget: string }
+      - { label: 一句话简介, name: summary, widget: text }
+      - { label: 精选项目, name: featured, widget: boolean, default: false }
+      - { label: 正文内容, name: body, widget: markdown }
