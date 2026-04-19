@@ -13,47 +13,217 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 const { Content } = await render(project);
+const allProjects = await getCollection('projects');
+const sorted = allProjects.sort((a, b) => b.data.year - a.data.year);
+const currentIndex = sorted.findIndex(p => p.id === project.id);
+const prev = sorted[currentIndex - 1];
+const next = sorted[currentIndex + 1];
 ---
 
-<BaseLayout title={project.data.title}>
+<BaseLayout title={project.data.title} description={project.data.summary}>
   <SiteNav slot="nav" />
-  <main class="project">
 
-    <header class="project-hero">
-      <h1>{project.data.title}</h1>
-      <p class="summary">{project.data.summary}</p>
-    </header>
+  <main>
+    <!-- Hero 全屏图 -->
+    <section class="project-hero fade-in">
+      <div class="project-hero-visual">
+        {project.data.cover
+          ? <img src={project.data.cover} alt={project.data.title} />
+          : <div style="width:100%;height:100%;background:var(--paper);" />
+        }
+      </div>
+      <div class="project-hero-overlay">
+        <div class="project-hero-inner">
+          <div class="eyebrow" style="margin-bottom: var(--s-3)">
+            {project.data.year} · {project.data.medium}
+          </div>
+          <h1 class="project-hero-title">{project.data.title}</h1>
+          <p class="project-hero-claim">{project.data.summary}</p>
+        </div>
+      </div>
+    </section>
 
-    <div class="project-meta">
-      <dl>
-        <dt>年份</dt><dd>{project.data.year}</dd>
-        <dt>媒介</dt><dd>{project.data.medium}</dd>
-      </dl>
+    <div class="shell">
+
+      <!-- 元数据 + 陈述 -->
+      <section class="project-meta fade-in">
+        <div class="project-meta-block">
+          <div class="project-meta-row">
+            <div class="meta-label">年份</div>
+            <div class="meta-value">{project.data.year}</div>
+          </div>
+          <div class="project-meta-row">
+            <div class="meta-label">媒介</div>
+            <div class="meta-value">{project.data.medium}</div>
+          </div>
+          {project.data.collaborators && project.data.collaborators.length > 0 && (
+            <div class="project-meta-row">
+              <div class="meta-label">合作者</div>
+              <div class="meta-value">{project.data.collaborators.join('、')}</div>
+            </div>
+          )}
+          {project.data.themes && (
+            <div class="project-meta-row">
+              <div class="meta-label">主题</div>
+              <div class="meta-value">{project.data.themes.join(' · ')}</div>
+            </div>
+          )}
+        </div>
+        <div class="project-statement">
+          <p>{project.data.summary}</p>
+        </div>
+      </section>
+
+      <!-- MDX 正文内容 -->
+      <div class="project-body">
+        <div class="project-content">
+          <Content />
+        </div>
+      </div>
+
+      <!-- 上一个 / 下一个项目 -->
+      {(prev || next) && (
+        <nav class="project-related fade-in">
+          {prev && (
+            <a href={`/projects/${prev.id}`} class="related-item">
+              <div class="related-dir">← 上一个项目</div>
+              <div class="related-title">{prev.data.title}</div>
+            </a>
+          )}
+          {next && (
+            <a href={`/projects/${next.id}`} class="related-item" style="text-align:right">
+              <div class="related-dir">下一个项目 →</div>
+              <div class="related-title">{next.data.title}</div>
+            </a>
+          )}
+        </nav>
+      )}
+
     </div>
-
-    <div class="project-body">
-      <Content />
-    </div>
-
   </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div>© 你的名字</div>
+      <div><a href="/" style="color:var(--text-secondary)">← 返回首页</a></div>
+    </div>
+  </footer>
 </BaseLayout>
 
 <style>
-  .project {
-    max-width: var(--container);
-    margin: 0 auto;
-    padding: 0 var(--space-5) var(--space-9);
-  }
-  .project-hero {
+  .project-content {
+    grid-column: 2;
     max-width: var(--measure);
-    padding: var(--space-8) 0 var(--space-6);
-    border-bottom: 1px solid var(--color-divider);
-    margin-bottom: var(--space-6);
+    font-family: var(--serif);
+    font-size: var(--fs-base);
+    line-height: 1.7;
   }
-  .project-hero h1 {
-    font-size: var(--text-3xl);
-    margin: 0 0 var(--space-4);
+
+  .project-content h2 {
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin-top: var(--s-8);
+    margin-bottom: var(--s-4);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--divider);
   }
-  .summary {
-    font-size: var(--text-lg);
-    color: var(--color-t
+
+  .project-content h2:first-child {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  .project-content p {
+    margin-bottom: var(--s-3);
+    color: var(--text);
+  }
+
+  .project-content img {
+    width: 100%;
+    height: auto;
+    margin: var(--s-5) 0;
+    object-fit: cover;
+  }
+
+  .project-content strong {
+    font-weight: 600;
+  }
+
+  .project-content em {
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+
+  .project-related {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-4);
+    margin: var(--s-9) 0 var(--s-6);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--divider);
+  }
+
+  .related-item {
+    display: block;
+    padding: var(--s-3) 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .related-item:first-child {
+    padding-right: var(--s-4);
+    border-right: 1px solid var(--divider);
+  }
+
+  .related-dir {
+    font-family: var(--sans);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: var(--s-2);
+  }
+
+  .related-title {
+    font-family: var(--serif);
+    font-size: var(--fs-lg);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    transition: color 200ms ease;
+  }
+
+  .related-item:hover .related-title { color: var(--accent); }
+
+  @media (max-width: 960px) {
+    .project-related {
+      grid-template-columns: 1fr;
+    }
+    .related-item:first-child {
+      border-right: none;
+      padding-right: 0;
+      border-bottom: 1px solid var(--divider);
+      padding-bottom: var(--s-4);
+    }
+  }
+</style>
+
+<script>
+  // Fade-in on scroll
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          observer.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.05 }
+  );
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>

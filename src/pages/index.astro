@@ -1,34 +1,78 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteNav from '../components/layout/SiteNav.astro';
+
+const allProjects = await getCollection('projects');
+const featured = allProjects
+  .filter(p => p.data.featured)
+  .sort((a, b) => b.data.year - a.data.year)
+  .slice(0, 4);
 ---
 
 <BaseLayout title="Portfolio">
   <SiteNav slot="nav" />
-  <main class="home">
-    <section class="intro">
-      <h1>设计是理解世界的方式。</h1>
-      <p class="lede">这里是我的研究与实践记录——探索大众博物学的视觉转译、信息的空间可视化，以及 AI 时代设计教育的重构。</p>
+
+  <main class="shell">
+
+    <!-- 首页陈述 -->
+    <section class="home-statement fade-in">
+      <div class="eyebrow">一本仍在生长的作品集 · 20XX 至今</div>
+      <div class="display-lg">
+        在这里写你最想说的一句话。
+        <br/>
+        <span style="color: var(--text-secondary)">
+          下面补充两三句，说清楚你是谁、你关心什么、你在探索什么方向。
+        </span>
+      </div>
     </section>
+
+    <!-- 精选项目 -->
+    <section class="home-featured">
+      {featured.map((project, i) => (
+        <article class="featured-card fade-in">
+          <a href={`/projects/${project.id}`} class="featured-card" style="display:contents">
+            <div class="featured-visual">
+              {project.data.cover
+                ? <img src={project.data.cover} alt={project.data.title} loading="lazy" />
+                : <div style="width:100%;height:100%;background:var(--paper);" />
+              }
+            </div>
+            <div class="featured-text">
+              <div class="featured-number">0{i + 1}</div>
+              <h2 class="featured-title">{project.data.title}</h2>
+              <div class="featured-tag">{project.data.medium}</div>
+              <p class="featured-desc">{project.data.summary}</p>
+              <span class="featured-read">阅读项目全文 →</span>
+            </div>
+          </a>
+        </article>
+      ))}
+    </section>
+
   </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div>© 你的名字。除注明外，所有内容均为本人创作。</div>
+      <div>正文使用 EB Garamond，导航使用 Inter。</div>
+    </div>
+  </footer>
 </BaseLayout>
 
-<style>
-  .home {
-    max-width: var(--container);
-    margin: 0 auto;
-    padding: var(--space-8) var(--space-5);
-  }
-  .intro {
-    max-width: var(--measure);
-  }
-  .intro h1 {
-    font-size: var(--text-3xl);
-    margin: 0 0 var(--space-4);
-  }
-  .lede {
-    font-size: var(--text-lg);
-    color: var(--color-text-secondary);
-    margin: 0;
-  }
-</style>
+<script>
+  // 滚动时触发 fade-in
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          observer.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
