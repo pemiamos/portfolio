@@ -1,0 +1,59 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteNav from '../../components/layout/SiteNav.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map(project => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+---
+
+<BaseLayout title={project.data.title}>
+  <SiteNav slot="nav" />
+  <main class="project">
+
+    <header class="project-hero">
+      <h1>{project.data.title}</h1>
+      <p class="summary">{project.data.summary}</p>
+    </header>
+
+    <div class="project-meta">
+      <dl>
+        <dt>年份</dt><dd>{project.data.year}</dd>
+        <dt>媒介</dt><dd>{project.data.medium}</dd>
+      </dl>
+    </div>
+
+    <div class="project-body">
+      <Content />
+    </div>
+
+  </main>
+</BaseLayout>
+
+<style>
+  .project {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 var(--space-5) var(--space-9);
+  }
+  .project-hero {
+    max-width: var(--measure);
+    padding: var(--space-8) 0 var(--space-6);
+    border-bottom: 1px solid var(--color-divider);
+    margin-bottom: var(--space-6);
+  }
+  .project-hero h1 {
+    font-size: var(--text-3xl);
+    margin: 0 0 var(--space-4);
+  }
+  .summary {
+    font-size: var(--text-lg);
+    color: var(--color-t
