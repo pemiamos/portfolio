@@ -1,0 +1,23 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: public/images/projects
+public_folder: /images/projects
+
+collections:
+  - name: projects
+    label: 项目
+    folder: src/content/projects
+    create: true
+    extension: mdx
+    format: frontmatter
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 年份, name: year, widget: number }
+      - { label: 媒介, name: medium, widget: string }
+      - { label: 主题, name: themes, widget: list }
+      - { label: 封面图, name: cover, widget: string }
+      - { label: 简介, name: summary, widget: text }
+      - { label: 精选, name: featured, widget: boolean, default: false }
+      - { label: 正文, name: body, widget: markdown }

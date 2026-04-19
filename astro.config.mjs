@@ -4,7 +4,6 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://pemiamos.github.io',
-  base: '/portfolio',
+  site: 'https://dulcet-fenglisu-dd9640.netlify.app',
   integrations: [mdx(), sitemap()],
 });
